@@ -104,30 +104,58 @@ def calculate_tables(rows, cols):
             row3.append(final_val)
         final_table.append(row3)
 
+    # Шаг 4: Применяем новую операцию по строкам
+    # Для каждой строки найдём номер столбца с максимальным значением.
+    # Будем считать, что нумерация столбцов начинается с 1.
+    modified_table = []  # новая таблица с результатом операции
+
+    for row in final_table:
+        # Находим максимальное значение и его индекс (если максимум встречается несколько раз, берём первый)
+        max_val = max(row)
+        max_index = row.index(max_val) + 1  # +1 чтобы получить номер столбца (не индекс)
+        
+        new_row = []
+        # Для каждого элемента в строке:
+        for c, cell_value in enumerate(row, start=0):  # начинаем нумерацию с 1
+            if c < max_index:
+                new_value = cell_value * (1 / max_index)
+            else:
+                new_value = cell_value * 0
+            new_row.append(new_value)
+        modified_table.append(new_row)
+
     # Отображение результатов в новом окне
     result_window = tk.Toplevel(root)
     result_window.title("Результаты вычислений")
 
-    # Исходная таблица
+    # Вывод исходной таблицы
     tk.Label(result_window, text="Исходная таблица:").pack()
     text1 = tk.Text(result_window, height=rows+2, width=50)
     text1.pack()
     for row in data_table:
         text1.insert(tk.END, str(row) + "\n")
 
-    # Таблица после этапа 2
+    # Вывод таблицы после шага 2
     tk.Label(result_window, text="Таблица после шага 2:").pack()
     text2 = tk.Text(result_window, height=rows+2, width=50)
     text2.pack()
     for row in table_2:
         text2.insert(tk.END, str(row) + "\n")
 
-    # Итоговая таблица после этапа 3
+    # Вывод итоговой таблицы после шага 3
     tk.Label(result_window, text="Итоговая таблица после шага 3:").pack()
     text3 = tk.Text(result_window, height=rows+2, width=50)
     text3.pack()
     for row in final_table:
         text3.insert(tk.END, str(row) + "\n")
+        
+    # Вывод новой таблицы после дополнительной операции
+    tk.Label(result_window, text="Итоговая таблица после дополнительной операции:").pack()
+    text4 = tk.Text(result_window, height=rows+2, width=50)
+    text4.pack()
+    for row in modified_table:
+        text4.insert(tk.END, str(row) + "\n")
+
 
 # Основное окно приложения
 root = tk.Tk()
