@@ -118,7 +118,7 @@ def calculate_tables(rows, cols):
         # Для каждого элемента в строке:
         for c, cell_value in enumerate(row, start=0):  # начинаем нумерацию с 1
             if c < max_index:
-                new_value = cell_value * (1 / max_index)
+                new_value = round(cell_value * (1 / max_index), 2)
             else:
                 new_value = cell_value * 0
             new_row.append(new_value)
@@ -135,20 +135,7 @@ def calculate_tables(rows, cols):
     for row in data_table:
         text1.insert(tk.END, str(row) + "\n")
 
-    # Вывод таблицы после шага 2
-    tk.Label(result_window, text="Таблица после шага 2:").pack()
-    text2 = tk.Text(result_window, height=rows+2, width=50)
-    text2.pack()
-    for row in table_2:
-        text2.insert(tk.END, str(row) + "\n")
-
-    # Вывод итоговой таблицы после шага 3
-    tk.Label(result_window, text="Итоговая таблица после шага 3:").pack()
-    text3 = tk.Text(result_window, height=rows+2, width=50)
-    text3.pack()
-    for row in final_table:
-        text3.insert(tk.END, str(row) + "\n")
-        
+       
     # Вывод новой таблицы после дополнительной операции
     tk.Label(result_window, text="Итоговая таблица после дополнительной операции:").pack()
     text4 = tk.Text(result_window, height=rows+2, width=50)
