@@ -1,72 +1,151 @@
-# Шаг 1: Ввод исходных данных
-rows = int(input("Введите количество строк: "))
-cols = int(input("Введите количество столбцов: "))
+import tkinter as tk
+from tkinter import ttk, messagebox
 
-data_table = []
-for i in range(rows):
-    row_data = []
-    for j in range(cols):
-        value = float(input(f"Введите число для ячейки ({i+1}, {j+1}): "))
-        row_data.append(value)
-    data_table.append(row_data)
+def create_table():
+    """
+    Функция считывает введённые пользователем значения для количества строк
+    и столбцов, затем создаёт динамически окно с таблицей ввода.
+    В заголовке для каждого столбца появляется выпадающий список (Combobox)
+    для выбора режима расчёта: «max» или «min».
+    """
+    try:
+        rows = int(entry_rows.get())
+        cols = int(entry_cols.get())
+        if rows <= 0 or cols <= 0:
+            raise ValueError
+    except ValueError:
+        messagebox.showerror("Ошибка", "Введите корректное положительное число для строк и столбцов")
+        return
 
-# Шаг 2: Запрос направления (max/min) для каждого столбца и расчёт таблицы 2
-column_preferences = []
-for j in range(cols):
-    while True:
-        pref = input(f"Столбец {j+1}: хотите ли вычислять по max или min? Введите 'max' или 'min': ").strip().lower()
-        if pref in ['max', 'min']:
-            column_preferences.append(pref)
-            break
-        else:
-            print("Неверный ввод. Попробуйте еще раз.")
+    # Скрываем фрейм ввода исходных размеров
+    frame_input.pack_forget()
 
-table_2 = []
-for i in range(rows):
-    row_2 = []
-    for j in range(cols):
-        col_values = [data_table[k][j] for k in range(rows)]
-        if column_preferences[j] == 'max':
-            max_val = max(col_values)
-            if max_val != 0:
-                new_val = data_table[i][j] / max_val
-            else:
-                new_val = 0
-        elif column_preferences[j] == 'min':
-            min_val = min(col_values)
-            if data_table[i][j] != 0:
-                new_val = min_val / data_table[i][j]
-            else:
-                new_val = 0
-        row_2.append(new_val)
-    table_2.append(row_2)
+    # Создаем новый фрейм для ввода таблицы
+    global frame_table, cell_entries, column_options
+    cell_entries = []      # двумерный список для полей ввода значений таблицы
+    column_options = []    # список переменных, связанных с выпадающими списками для столбцов
 
-# Шаг 3: Расчёт итоговой таблицы (деление на сумму по столбцу таблицы 2)
-column_sums = []
-for j in range(cols):
-    col_sum = sum([table_2[i][j] for i in range(rows)])
-    column_sums.append(col_sum)
+    frame_table = tk.Frame(root)
+    frame_table.pack(pady=10)
 
-final_table = []
-for i in range(rows):
-    final_row = []
-    for j in range(cols):
-        if column_sums[j] != 0:
-            final_val = table_2[i][j] / column_sums[j]
-        else:
-            final_val = 0
-        final_row.append(final_val)
-    final_table.append(final_row)
+    # Создаем "заголовок" таблицы: для каждого столбца располагаем ярлык и выпадающий список
+    for col in range(cols):
+        var = tk.StringVar(value="max")  # по умолчанию значение "max"
+        column_options.append(var)        # сохраняем переменную для последующего доступа
+        label = tk.Label(frame_table, text=f"Столбец {col+1}")
+        label.grid(row=0, column=col, padx=5, pady=5)
+        # Выпадающий список с вариантами «max» и «min»
+        dropdown = ttk.Combobox(frame_table, textvariable=var, values=["max", "min"], state="readonly", width=7)
+        dropdown.grid(row=1, column=col, padx=5, pady=5)
 
-# Вывод результатов
-print("\nИсходная таблица:")
-for row in data_table:
-    print(row)
+    # Создаем поля ввода для каждой ячейки (расположены ниже заголовка)
+    for r in range(rows):
+        row_entries = []
+        for c in range(cols):
+            entry = tk.Entry(frame_table, width=10)
+            entry.grid(row=r+2, column=c, padx=5, pady=5)
+            row_entries.append(entry)
+        cell_entries.append(row_entries)
 
-print("\nТаблица после расчётов шага 2:")
-for row in table_2:
-    print(row)
+    # Кнопка для запуска расчётов, которая расположена ниже таблицы ввода
+    btn_calc = tk.Button(root, text="Вычислить", command=lambda: calculate_tables(rows, cols))
+    btn_calc.pack(pady=10)
 
-print("\nИтоговая таблица после шага 3:")
-for row in final_table:
-    print(row)
+def calculate_tables(rows, cols):
+    """
+    Функция собирает введённые значения из полей ввода и выполняет расчёты:
+    1. Для каждого столбца в зависимости от выбранного значения (max/min)
+       высчитывается новая таблица (таблица 2).
+    2. Затем каждая ячейка таблицы 2 делится на сумму значений своего столбца (итоговая таблица).
+    После расчетов результаты отображаются в новом окне.
+    """
+    # Сбор данных из таблицы ввода
+    data_table = []
+    try:
+        for r in range(rows):
+            row_data = []
+            for c in range(cols):
+                val = float(cell_entries[r][c].get())
+                row_data.append(val)
+            data_table.append(row_data)
+    except ValueError:
+        messagebox.showerror("Ошибка", "Убедитесь, что все ячейки заполнены числовыми значениями")
+        return
+
+    # Шаг 2: Расчет таблицы 2 по выбранным условиям для каждого столбца
+    table_2 = []
+    for r in range(rows):
+        row2 = []
+        for c in range(cols):
+            # Собираем данные для столбца c
+            col_values = [data_table[i][c] for i in range(rows)]
+            if column_options[c].get() == "max":
+                max_val = max(col_values)
+                # Делим значение на максимум (с проверкой на деление на ноль)
+                new_val = data_table[r][c] / max_val if max_val != 0 else 0
+            elif column_options[c].get() == "min":
+                min_val = min(col_values)
+                # Делим минимум на значение ячейки (с проверкой на деление на ноль)
+                new_val = min_val / data_table[r][c] if data_table[r][c] != 0 else 0
+            row2.append(new_val)
+        table_2.append(row2)
+
+    # Шаг 3: Итоговая таблица – делим каждую ячейку таблицы 2 на сумму значений в столбце
+    column_sums = []
+    for c in range(cols):
+        col_sum = sum([table_2[r][c] for r in range(rows)])
+        column_sums.append(col_sum)
+
+    final_table = []
+    for r in range(rows):
+        row3 = []
+        for c in range(cols):
+            final_val = table_2[r][c] / column_sums[c] if column_sums[c] != 0 else 0
+            row3.append(final_val)
+        final_table.append(row3)
+
+    # Отображение результатов в новом окне
+    result_window = tk.Toplevel(root)
+    result_window.title("Результаты вычислений")
+
+    # Исходная таблица
+    tk.Label(result_window, text="Исходная таблица:").pack()
+    text1 = tk.Text(result_window, height=rows+2, width=50)
+    text1.pack()
+    for row in data_table:
+        text1.insert(tk.END, str(row) + "\n")
+
+    # Таблица после этапа 2
+    tk.Label(result_window, text="Таблица после шага 2:").pack()
+    text2 = tk.Text(result_window, height=rows+2, width=50)
+    text2.pack()
+    for row in table_2:
+        text2.insert(tk.END, str(row) + "\n")
+
+    # Итоговая таблица после этапа 3
+    tk.Label(result_window, text="Итоговая таблица после шага 3:").pack()
+    text3 = tk.Text(result_window, height=rows+2, width=50)
+    text3.pack()
+    for row in final_table:
+        text3.insert(tk.END, str(row) + "\n")
+
+# Основное окно приложения
+root = tk.Tk()
+root.title("Расчёты таблицы")
+
+# Фрейм для первоначального ввода количества строк и столбцов
+frame_input = tk.Frame(root)
+frame_input.pack(pady=10)
+
+tk.Label(frame_input, text="Введите количество строк:").grid(row=0, column=0, padx=5, pady=5)
+entry_rows = tk.Entry(frame_input, width=5)
+entry_rows.grid(row=0, column=1, padx=5, pady=5)
+
+tk.Label(frame_input, text="Введите количество столбцов:").grid(row=1, column=0, padx=5, pady=5)
+entry_cols = tk.Entry(frame_input, width=5)
+entry_cols.grid(row=1, column=1, padx=5, pady=5)
+
+btn_create = tk.Button(frame_input, text="Создать таблицу", command=create_table)
+btn_create.grid(row=2, column=0, columnspan=2, pady=10)
+
+root.mainloop()
