@@ -1,5 +1,20 @@
+"""
+Selectra — простое приложение для многокритериального анализа с графическим интерфейсом.
+Разработано с использованием Tkinter. Поддерживает нормализацию данных, выбор приоритетов, итоговые оценки.
+
+Авторы: ExcelPunk & Avysmorfias
+Лицензия: MIT
+"""
+
 import tkinter as tk
 from tkinter import ttk, messagebox
+import sys
+import os
+
+def resource_path(relative_path):
+    if hasattr(sys, '_MEIPASS'):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 def create_table():
     try:
@@ -137,6 +152,9 @@ def calculate_tables(rows, cols):
 
 # Главное окно
 root = tk.Tk()
+icon_path = resource_path("selectra-logo.ico")
+root.iconbitmap(icon_path)
+
 root.title("Расчёты таблицы")
 
 frame_input = tk.Frame(root)

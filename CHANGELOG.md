@@ -7,9 +7,10 @@
 <details>
 <summary>Русская версия</summary>
 
-## [5.0] — Сборка в исполняемый файл
+## [4.3] — Сборка в исполняемый файл
 ### Добавлено
 - Программа собрана в `.exe`-файл (EXE-шник) для удобного запуска
+- Добавлен логотип
 
 ---
 
@@ -75,9 +76,10 @@
 <details>
 <summary>English version</summary>
 
-## [5.0] — Compiled executable
+## [4.3] — Compiled executable
 ### Added
 - Program compiled into `.exe` file for convenient launching
+- Logo added
 
 ---
 
